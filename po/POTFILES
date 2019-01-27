@@ -1,0 +1,7 @@
+data/org.gnome.Deap.desktop.in
+data/org.gnome.Deap.appdata.xml.in
+data/org.gnome.Deap.gschema.xml
+src/deap-window.ui
+src/main.c
+src/deap-window.c
+
