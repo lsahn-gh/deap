@@ -39,12 +39,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="button_screen_brightness">
                 <property name="label" translatable="yes">Open the dialog</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Open a dialog to control the brightness of your screen</property>
+                <signal name="clicked" handler="open_screen_brightness_dialog_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
