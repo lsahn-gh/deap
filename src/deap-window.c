@@ -36,7 +36,7 @@ G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static gboolean
 open_gnome_shell_dialog_cb (GtkButton *button,
-                                  gpointer   user_data)
+                            gpointer   user_data)
 {
   DeapWindow *self = DEAP_WINDOW (user_data);
 
