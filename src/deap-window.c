@@ -41,6 +41,7 @@ open_gnome_shell_dialog_cb (GtkButton *button,
   DeapWindow *self = DEAP_WINDOW (user_data);
 
   self->gnome_shell = deap_gnome_shell_get_instance ();
+  g_object_add_weak_pointer (G_OBJECT (self->gnome_shell), (gpointer) &self->gnome_shell);
 
   gtk_widget_show_all (self->gnome_shell);
 
