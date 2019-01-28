@@ -38,6 +38,15 @@ struct _DeapGnomeShell
 
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_WINDOW)
 
+/*
+ * execute_show_applications_cb
+ *
+ * org.gnome.Shell
+ *
+ * Method: ShowApplications
+ * Property: None
+ * Return: None
+ */
 static gboolean
 execute_show_applications_cb (GtkButton *button,
                              gpointer   user_data)
@@ -56,6 +65,16 @@ execute_show_applications_cb (GtkButton *button,
   return TRUE;
 }
 
+/*
+ * get_shell_version
+ *
+ * org.gnome.Shell
+ *
+ * Method: None
+ * Property: ShellVersion
+ * Return gnome shell version
+ * Ret type: String
+ */
 static void
 get_shell_version (DeapGnomeShell *self)
 {
