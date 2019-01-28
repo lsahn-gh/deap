@@ -34,9 +34,37 @@ struct _DeapGnomeShell
   GtkWidget     *list_box;
   GtkLabel      *shell_version;
   GtkButton     *show_applications;
+  GtkButton     *focus_search;
 };
 
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_WINDOW)
+
+/*
+ * execute_focus_search_cb
+ *
+ * org.gnome.Shell
+ *
+ * Method: FocusSearch
+ * Property: None
+ * Return: None
+ */
+static gboolean
+execute_focus_search_cb (GtkButton *button,
+                         gpointer   user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+
+  g_dbus_proxy_call (self->shell,
+                     "FocusSearch",
+                     NULL,
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     NULL,
+                     self);
+
+  return TRUE;
+}
 
 /*
  * execute_show_applications_cb
@@ -151,8 +179,10 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, list_box);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, shell_version);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, show_applications);
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, focus_search);
 
   gtk_widget_class_bind_template_callback (widget_class, execute_show_applications_cb);
+  gtk_widget_class_bind_template_callback (widget_class, execute_focus_search_cb);
 }
 
 static void
