@@ -90,9 +90,11 @@ deap_gnome_shell_finalize (GObject *object)
 {
   DeapGnomeShell *self = DEAP_GNOME_SHELL (object);
 
-  g_cancellable_cancel (self->cancellable);
+  if (self->cancellable) {
+    g_cancellable_cancel (self->cancellable);
+    g_clear_object (&self->cancellable);
+  }
 
-  g_clear_object (&self->cancellable);
   g_clear_object (&self->shell);
 
   G_OBJECT_CLASS (deap_gnome_shell_parent_class)->finalize (object);
