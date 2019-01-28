@@ -33,9 +33,28 @@ struct _DeapGnomeShell
   /* Widgets */
   GtkWidget     *list_box;
   GtkLabel      *shell_version;
+  GtkButton     *show_applications;
 };
 
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_WINDOW)
+
+static gboolean
+execute_show_applications_cb (GtkButton *button,
+                             gpointer   user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+
+  g_dbus_proxy_call (self->shell,
+                     "ShowApplications",
+                     NULL,
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     NULL,
+                     self);
+
+  return TRUE;
+}
 
 static void
 get_shell_version (DeapGnomeShell *self)
@@ -112,6 +131,9 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-gnome-shell.ui");
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, list_box);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, shell_version);
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, show_applications);
+
+  gtk_widget_class_bind_template_callback (widget_class, execute_show_applications_cb);
 }
 
 static void
