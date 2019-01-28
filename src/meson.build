@@ -2,7 +2,7 @@ deap_sources = [
   'main.c',
   'deap-application.c',
   'deap-window.c',
-  'deap-screen-brightness.c',
+  'deap-gnome-shell.c',
 ]
 
 deap_deps = [

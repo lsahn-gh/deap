@@ -2,6 +2,6 @@
 <gresources>
   <gresource prefix="/com/github/memnoth/Deap">
     <file>deap-window.ui</file>
-    <file>deap-screen-brightness.ui</file>
+    <file>deap-gnome-shell.ui</file>
   </gresource>
 </gresources>

@@ -24,10 +24,10 @@
 
 G_BEGIN_DECLS
 
-#define DEAP_TYPE_SCREEN_BRIGHTNESS (deap_screen_brightness_get_type ())
+#define DEAP_TYPE_GNOME_SHELL (deap_gnome_shell_get_type ())
 
-G_DECLARE_FINAL_TYPE (DeapScreenBrightness, deap_screen_brightness, DEAP, SCREEN_BRIGHTNESS, GtkWindow)
+G_DECLARE_FINAL_TYPE (DeapGnomeShell, deap_gnome_shell, DEAP, GNOME_SHELL, GtkWindow)
 
-GtkWidget *     deap_screen_brightness_get_instance   (void);
+GtkWidget *     deap_gnome_shell_get_instance   (void);
 
 G_END_DECLS

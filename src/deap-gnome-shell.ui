@@ -2,11 +2,11 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <template class="DeapScreenBrightness" parent="GtkWindow">
+  <template class="DeapGnomeShell" parent="GtkWindow">
     <property name="can_focus">False</property>
     <property name="border_width">10</property>
     <property name="type">popup</property>
-    <property name="title" translatable="yes">Screen Brightness Dialog</property>
+    <property name="title" translatable="yes">Gnome Shell Dialog</property>
     <property name="default_width">440</property>
     <property name="default_height">250</property>
     <child type="titlebar">
@@ -28,3 +28,4 @@
     </child>
   </template>
 </interface>
+

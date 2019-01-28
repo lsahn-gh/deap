@@ -19,7 +19,7 @@
 #include "deap-config.h"
 #include "deap-window.h"
 
-#include "deap-screen-brightness.h"
+#include "deap-gnome-shell.h"
 
 struct _DeapWindow
 {
@@ -27,22 +27,22 @@ struct _DeapWindow
 
   /* Template widgets */
   GtkHeaderBar        *header_bar;
-  GtkButton           *button_screen_brightness;
+  GtkButton           *button_gnome_shell;
 
-  GtkWidget           *screen_brightness;
+  GtkWidget           *gnome_shell;
 };
 
 G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static gboolean
-open_screen_brightness_dialog_cb (GtkButton *button,
+open_gnome_shell_dialog_cb (GtkButton *button,
                                   gpointer   user_data)
 {
   DeapWindow *self = DEAP_WINDOW (user_data);
 
-  self->screen_brightness = deap_screen_brightness_get_instance ();
+  self->gnome_shell = deap_gnome_shell_get_instance ();
 
-  gtk_widget_show_all (self->screen_brightness);
+  gtk_widget_show_all (self->gnome_shell);
 }
 
 static void
@@ -50,7 +50,7 @@ deap_window_dispose (GObject *object)
 {
   DeapWindow *self = DEAP_WINDOW (object);
 
-  g_clear_object (&self->screen_brightness);
+  g_clear_object (&self->gnome_shell);
 
   G_OBJECT_CLASS (deap_window_parent_class)->dispose (object);
 }
@@ -65,9 +65,9 @@ deap_window_class_init (DeapWindowClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-window.ui");
   gtk_widget_class_bind_template_child (widget_class, DeapWindow, header_bar);
-  gtk_widget_class_bind_template_child (widget_class, DeapWindow, button_screen_brightness);
+  gtk_widget_class_bind_template_child (widget_class, DeapWindow, button_gnome_shell);
 
-  gtk_widget_class_bind_template_callback (widget_class, open_screen_brightness_dialog_cb);
+  gtk_widget_class_bind_template_callback (widget_class, open_gnome_shell_dialog_cb);
 }
 
 static void
