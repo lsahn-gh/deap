@@ -43,6 +43,8 @@ open_gnome_shell_dialog_cb (GtkButton *button,
   self->gnome_shell = deap_gnome_shell_get_instance ();
 
   gtk_widget_show_all (self->gnome_shell);
+
+  return TRUE;
 }
 
 static void
