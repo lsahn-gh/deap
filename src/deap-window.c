@@ -28,9 +28,6 @@ struct _DeapWindow
   GtkLabel            *label;
 };
 
-#define DEFAULT_WINDOW_WIDTH      600
-#define DEFAULT_WINDOW_HEIGHT     300
-
 G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void
@@ -54,7 +51,5 @@ deap_window_new (DeapApplication *application)
 {
   return GTK_WIDGET (g_object_new (DEAP_TYPE_WINDOW,
                                    "application", application,
-                                   "default-width", DEFAULT_WINDOW_WIDTH,
-                                   "default-height", DEFAULT_WINDOW_HEIGHT,
                                    NULL));
 }
