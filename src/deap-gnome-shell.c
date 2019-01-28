@@ -27,8 +27,13 @@ struct _DeapGnomeShell
 {
   GtkWindow     parent_window;
 
+  /* org.gnome.Shell */
   GDBusProxy    *shell;
   GCancellable  *cancellable;
+
+  /* org.gnome.Shell.Extensions */
+  GDBusProxy    *ext_shell;
+  GCancellable  *ext_cancellable;
 
   /* Widgets */
   GtkWidget     *list_box;
@@ -144,6 +149,53 @@ shell_proxy_acquired_cb (GObject      *source,
   }
 }
 
+static void
+ext_shell_proxy_acquired_cb (GObject      *source,
+                             GAsyncResult *res,
+                             gpointer      user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+  g_autoptr(GError) error = NULL;
+
+  self->ext_shell = g_dbus_proxy_new_for_bus_finish (res, &error);
+
+  if (error)
+    g_warning ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
+  else {
+    g_info ("Acquired org.gnome.Shell.Extensions");
+  }
+}
+
+static void
+register_gdbus_proxies (DeapGnomeShell *self)
+{
+  g_return_if_fail (self != NULL);
+
+  /* org.gnome.Shell */
+  self->cancellable = g_cancellable_new ();
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL, /* GDBusInterfaceInfo */
+                            "org.gnome.Shell",
+                            "/org/gnome/Shell",
+                            "org.gnome.Shell",
+                            self->cancellable,
+                            shell_proxy_acquired_cb, /* Callback */
+                            self);
+
+  /* org.gnome.Shell.Extensions */
+  self->ext_cancellable = g_cancellable_new ();
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL,
+                            "org.gnome.Shell",
+                            "/org/gnome/Shell",
+                            "org.gnome.Shell.Extensions",
+                            self->ext_cancellable,
+                            ext_shell_proxy_acquired_cb,
+                            self);
+}
+
 /* --- GObjet --- */
 static void
 deap_gnome_shell_dispose (GObject *object)
@@ -161,8 +213,13 @@ deap_gnome_shell_finalize (GObject *object)
     g_clear_object (&self->cancellable);
   }
 
-  g_clear_object (&self->shell);
+  if (self->ext_cancellable) {
+    g_cancellable_cancel (self->ext_cancellable);
+    g_clear_object (&self->ext_cancellable);
+  }
 
+  g_clear_object (&self->shell);
+  g_clear_object (&self->ext_shell);
   G_OBJECT_CLASS (deap_gnome_shell_parent_class)->finalize (object);
 }
 
@@ -190,17 +247,7 @@ deap_gnome_shell_init (DeapGnomeShell *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  self->cancellable = g_cancellable_new ();
-
-  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                            G_DBUS_PROXY_FLAGS_NONE,
-                            NULL, /* GDBusInterfaceInfo */
-                            "org.gnome.Shell",
-                            "/org/gnome/Shell",
-                            "org.gnome.Shell",
-                            self->cancellable,
-                            shell_proxy_acquired_cb, /* Callback */
-                            self);
+  register_gdbus_proxies (self);
 }
 
 static GtkWidget *
