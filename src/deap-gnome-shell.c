@@ -143,7 +143,7 @@ deap_gnome_shell_get_instance (void)
 
   if (instance == NULL) {
     instance = deap_gnome_shell_new ();
-    g_object_add_weak_pointer (G_OBJECT (instance), &instance);
+    g_object_add_weak_pointer (G_OBJECT (instance), (gpointer) &instance);
   }
 
   return instance;
