@@ -32,16 +32,56 @@ struct _DeapGnomeShell
 
   /* Widgets */
   GtkWidget     *list_box;
+  GtkLabel      *shell_version;
 };
 
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_WINDOW)
+
+static void
+get_shell_version (DeapGnomeShell *self)
+{
+  g_autoptr(GVariant) gvar_ver = NULL;
+  const gchar *ret;
+  gsize len;
+
+  g_return_if_fail (self != NULL);
+  g_return_if_fail (self->shell != NULL);
+
+  gvar_ver = g_dbus_proxy_get_cached_property (self->shell, "ShellVersion");
+  if (gvar_ver == NULL) {
+    g_warning ("ShellVersion property is not cached yet");
+    return;
+  }
+
+  ret = g_variant_get_string (gvar_ver, &len);
+  if (len == 0)
+    return;
+
+  gtk_label_set_text (self->shell_version, ret);
+}
+
+static void
+shell_proxy_acquired_cb (GObject      *source,
+                         GAsyncResult *res,
+                         gpointer      user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+  g_autoptr(GError) error = NULL;
+
+  self->shell = g_dbus_proxy_new_for_bus_finish (res, &error);
+
+  if (error)
+    g_warning ("Error acquiring org.gnome.Shell: %s", error->message);
+  else {
+    g_info ("Acquired org.gnome.Shell");
+    get_shell_version (self);
+  }
+}
 
 /* --- GObjet --- */
 static void
 deap_gnome_shell_dispose (GObject *object)
 {
-  DeapGnomeShell *self = DEAP_GNOME_SHELL (object);
-
   G_OBJECT_CLASS (deap_gnome_shell_parent_class)->dispose (object);
 }
 
@@ -69,6 +109,7 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-gnome-shell.ui");
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, list_box);
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, shell_version);
 }
 
 static void
@@ -85,7 +126,7 @@ deap_gnome_shell_init (DeapGnomeShell *self)
                             "/org/gnome/Shell",
                             "org.gnome.Shell",
                             self->cancellable,
-                            NULL, /* Callback */
+                            shell_proxy_acquired_cb, /* Callback */
                             self);
 }
 
