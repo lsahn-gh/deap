@@ -40,9 +40,126 @@ struct _DeapGnomeShell
   GtkLabel      *shell_version;
   GtkButton     *show_applications;
   GtkButton     *focus_search;
+  GtkTreeView   *ext_list_extensions;
+
+  GPtrArray     *shell_ext_infos;
 };
 
+typedef struct
+{
+  gchar *name;
+  gchar *description;
+  gchar *url;
+  gchar *uuid;
+} ShellExtInfo;
+
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_WINDOW)
+
+/* value must be {sv} type. */
+static gpointer
+shell_ext_info_new (GVariant *value)
+{
+  ShellExtInfo *info;
+  gchar *name;
+  gchar *description;
+  gchar *url;
+  gchar *uuid;
+
+  info = g_new0 (ShellExtInfo, 1);
+
+  g_variant_lookup (value, "name", "s", &name);
+  g_variant_lookup (value, "description", "s", &description);
+  g_variant_lookup (value, "url", "s", &url);
+  g_variant_lookup (value, "uuid", "s", &uuid);
+
+  info->name = g_strdup (name);
+  info->description = g_strdup (description);
+  info->url = g_strdup (url);
+  info->uuid = g_strdup (uuid);
+
+  return (gpointer) info;
+}
+
+static void
+shell_ext_info_free (gpointer user_data)
+{
+  ShellExtInfo *info = (ShellExtInfo *)user_data;
+
+  g_free (info->name);
+  g_free (info->description);
+  g_free (info->url);
+  g_free (info->uuid);
+  g_free (info);
+}
+
+static GPtrArray *
+parse_datas_from_serialized_resource (GVariant *resource)
+{
+  g_autoptr(GVariant) dict = NULL;
+  g_autoptr(GVariantIter) iter = NULL;
+  GPtrArray *ret = NULL;
+  GVariant *child = NULL;
+  gsize len;
+
+  g_return_val_if_fail (resource != NULL, NULL);
+
+  /* type (a{sa{sv}}) */
+  g_variant_get (resource, "(@a{?*})", &dict);
+  len = g_variant_n_children (dict);
+
+  ret = g_ptr_array_new_full (len, shell_ext_info_free);
+
+  iter = g_variant_iter_new (dict);
+  while ((child = g_variant_iter_next_value (iter))) {
+    const gchar *key;
+    gpointer *p = NULL;
+    GVariant *val = NULL;
+
+    g_variant_get (child, "{s@a{?*}}", &key, &val);
+
+    p = shell_ext_info_new (val);
+    g_ptr_array_add (ret, p);
+
+    g_variant_unref (child);
+  }
+
+  return ret;
+}
+
+static void
+get_list_extensions_finish (GObject      *source,
+                            GAsyncResult *res,
+                            gpointer      user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GError) error = NULL;
+
+  ret = g_dbus_proxy_call_finish (self->ext_shell,
+                                        res,
+                                        &error);
+  if (error) {
+    g_warning ("Error org.gnome.ShellExtensions.ListExtensions: %s", error->message);
+    return;
+  }
+
+  self->shell_ext_infos = parse_datas_from_serialized_resource (ret);
+}
+
+static void
+ext_get_list_extensions (DeapGnomeShell *self)
+{
+  g_return_if_fail (self != NULL);
+
+  g_dbus_proxy_call (self->ext_shell,
+                     "ListExtensions",
+                     NULL,
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     (GAsyncReadyCallback) get_list_extensions_finish,
+                     self);
+}
 
 /*
  * execute_focus_search_cb
@@ -163,6 +280,7 @@ ext_shell_proxy_acquired_cb (GObject      *source,
     g_warning ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
   else {
     g_info ("Acquired org.gnome.Shell.Extensions");
+    ext_get_list_extensions (self);
   }
 }
 
@@ -218,8 +336,14 @@ deap_gnome_shell_finalize (GObject *object)
     g_clear_object (&self->ext_cancellable);
   }
 
+  if (self->shell_ext_infos) {
+    g_ptr_array_unref (self->shell_ext_infos);
+    self->shell_ext_infos = NULL;
+  }
+
   g_clear_object (&self->shell);
   g_clear_object (&self->ext_shell);
+
   G_OBJECT_CLASS (deap_gnome_shell_parent_class)->finalize (object);
 }
 
@@ -233,13 +357,17 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   object_class->finalize = deap_gnome_shell_finalize;
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-gnome-shell.ui");
+
+  /* org.gnome.Shell widgets */
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, list_box);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, shell_version);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, show_applications);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, focus_search);
-
   gtk_widget_class_bind_template_callback (widget_class, execute_show_applications_cb);
   gtk_widget_class_bind_template_callback (widget_class, execute_focus_search_cb);
+
+  /* org.gnome.Shell.Extensions widgets */
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, ext_list_extensions);
 }
 
 static void
