@@ -20,6 +20,7 @@
 #include "deap-window.h"
 
 #include "deap-gnome-shell.h"
+#include "deap-login1.h"
 
 struct _DeapWindow
 {
@@ -30,6 +31,7 @@ struct _DeapWindow
   GtkListBox          *list_box;
 
   GtkWidget           *gnome_shell;
+  GtkWidget           *login1_window;
 };
 
 typedef struct
@@ -44,6 +46,19 @@ typedef struct
 
 G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
+
+static void
+open_login1_window_cb (GtkWidget *button,
+                       gpointer   user_data)
+{
+  DeapWindow *self = DEAP_WINDOW (user_data);
+
+  self->login1_window = deap_login1_get_instance ();
+  g_object_add_weak_pointer (G_OBJECT (self->login1_window),
+                             (gpointer) &self->login1_window);
+
+  gtk_widget_show_all (self->login1_window);
+}
 
 static void
 open_gnome_shell_dialog_cb (GtkWidget *button,
@@ -92,6 +107,7 @@ create_list_box_row (DeapWindow    *self,
 
 static const RowData row_table[] = {
     { "org.gnome.Shell", "", "", open_gnome_shell_dialog_cb },
+    { "org.freedesktop.login1", "", "", open_login1_window_cb },
     { NULL }
 };
 
@@ -116,6 +132,7 @@ deap_window_dispose (GObject *object)
   DeapWindow *self = DEAP_WINDOW (object);
 
   g_clear_object (&self->gnome_shell);
+  g_clear_object (&self->login1_window);
 
   G_OBJECT_CLASS (deap_window_parent_class)->dispose (object);
 }

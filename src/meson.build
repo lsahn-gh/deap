@@ -3,6 +3,7 @@ deap_sources = [
   'deap-application.c',
   'deap-window.c',
   'deap-gnome-shell.c',
+  'deap-login1.c',
 ]
 
 deap_deps = [
