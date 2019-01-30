@@ -42,8 +42,6 @@ typedef struct
                gpointer   user_data);
 } RowData;
 
-typedef void (*fptr_btn_click)(GtkWidget *button, gpointer user_data);
-
 G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
 
