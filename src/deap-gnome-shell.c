@@ -112,7 +112,7 @@ parse_datas_from_serialized_resource (GVariant *resource)
   iter = g_variant_iter_new (dict);
   while ((child = g_variant_iter_next_value (iter))) {
     const gchar *key;
-    gpointer *p = NULL;
+    gpointer p = NULL;
     GVariant *val = NULL;
 
     g_variant_get (child, "{s@a{?*}}", &key, &val);
