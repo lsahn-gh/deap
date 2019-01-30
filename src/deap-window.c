@@ -30,7 +30,7 @@ struct _DeapWindow
   GtkHeaderBar        *header_bar;
   GtkListBox          *list_box;
 
-  GtkWidget           *gnome_shell;
+  GtkWidget           *gnome_shell_window;
   GtkWidget           *login1_window;
 };
 
@@ -61,15 +61,16 @@ open_login1_window_cb (GtkWidget *button,
 }
 
 static void
-open_gnome_shell_dialog_cb (GtkWidget *button,
+open_gnome_shell_window_cb (GtkWidget *button,
                             gpointer   user_data)
 {
   DeapWindow *self = DEAP_WINDOW (user_data);
 
-  self->gnome_shell = deap_gnome_shell_get_instance ();
-  g_object_add_weak_pointer (G_OBJECT (self->gnome_shell), (gpointer) &self->gnome_shell);
+  self->gnome_shell_window = deap_gnome_shell_get_instance ();
+  g_object_add_weak_pointer (G_OBJECT (self->gnome_shell_window),
+                             (gpointer) &self->gnome_shell_window);
 
-  gtk_widget_show_all (self->gnome_shell);
+  gtk_widget_show_all (self->gnome_shell_window);
 }
 
 static GtkWidget *
@@ -106,7 +107,7 @@ create_list_box_row (DeapWindow    *self,
 }
 
 static const RowData row_table[] = {
-    { "org.gnome.Shell", "", "", open_gnome_shell_dialog_cb },
+    { "org.gnome.Shell", "", "", open_gnome_shell_window_cb },
     { "org.freedesktop.login1", "", "", open_login1_window_cb },
     { NULL }
 };
@@ -131,7 +132,7 @@ deap_window_dispose (GObject *object)
 {
   DeapWindow *self = DEAP_WINDOW (object);
 
-  g_clear_object (&self->gnome_shell);
+  g_clear_object (&self->gnome_shell_window);
   g_clear_object (&self->login1_window);
 
   G_OBJECT_CLASS (deap_window_parent_class)->dispose (object);
@@ -148,8 +149,6 @@ deap_window_class_init (DeapWindowClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-window.ui");
   gtk_widget_class_bind_template_child (widget_class, DeapWindow, header_bar);
   gtk_widget_class_bind_template_child (widget_class, DeapWindow, list_box);
-
-  gtk_widget_class_bind_template_callback (widget_class, open_gnome_shell_dialog_cb);
 }
 
 static void
