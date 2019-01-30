@@ -83,8 +83,9 @@ create_list_box_row (DeapWindow    *self,
   icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic", GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), icon);
   gtk_widget_set_tooltip_text (button, data->tooltip);
+  gtk_widget_set_margin_end (button, 20);
   g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (data->fptr), self);
-  gtk_box_pack_end (GTK_BOX (row), button, TRUE, FALSE, 0);
+  gtk_box_pack_end (GTK_BOX (row), button, FALSE, FALSE, 0);
 
   gtk_widget_show_all (row);
 
