@@ -27,15 +27,28 @@ struct _DeapWindow
 
   /* Template widgets */
   GtkHeaderBar        *header_bar;
-  GtkButton           *button_gnome_shell;
+  GtkListBox          *list_box;
 
   GtkWidget           *gnome_shell;
 };
 
+typedef struct
+{
+  const gchar *name;
+  const gchar *description;
+  const gchar *tooltip;
+
+  void (*fptr)(GtkWidget *button,
+               gpointer   user_data);
+} RowData;
+
+typedef void (*fptr_btn_click)(GtkWidget *button, gpointer user_data);
+
 G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
-static gboolean
-open_gnome_shell_dialog_cb (GtkButton *button,
+
+static void
+open_gnome_shell_dialog_cb (GtkWidget *button,
                             gpointer   user_data)
 {
   DeapWindow *self = DEAP_WINDOW (user_data);
@@ -44,10 +57,60 @@ open_gnome_shell_dialog_cb (GtkButton *button,
   g_object_add_weak_pointer (G_OBJECT (self->gnome_shell), (gpointer) &self->gnome_shell);
 
   gtk_widget_show_all (self->gnome_shell);
-
-  return TRUE;
 }
 
+static GtkWidget *
+create_list_box_row (DeapWindow    *self,
+                     const RowData *data)
+{
+  GtkWidget *row;
+  GtkWidget *button;
+  GtkWidget *icon;
+  GtkWidget *name;
+  GtkWidget *vbox;
+
+  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_container_set_border_width (GTK_CONTAINER (row), 5);
+
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+  gtk_box_set_homogeneous (GTK_BOX (vbox), TRUE);
+  gtk_box_pack_start (GTK_BOX (row), vbox, TRUE, FALSE, 0);
+
+  name = gtk_label_new (data->name);
+  gtk_box_pack_start (GTK_BOX (vbox), name, TRUE, FALSE, 0);
+
+  button = gtk_button_new ();
+  icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic", GTK_ICON_SIZE_BUTTON);
+  gtk_button_set_image (GTK_BUTTON (button), icon);
+  gtk_widget_set_tooltip_text (button, data->tooltip);
+  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (data->fptr), self);
+  gtk_box_pack_end (GTK_BOX (row), button, TRUE, FALSE, 0);
+
+  gtk_widget_show_all (row);
+
+  return row;
+}
+
+static const RowData row_table[] = {
+    { "org.gnome.Shell", "", "", open_gnome_shell_dialog_cb },
+    { NULL }
+};
+
+static void
+create_list_box (DeapWindow *self)
+{
+  GtkListBox *list_box = self->list_box;
+  gsize i;
+
+  for (i = 0; row_table[i].name; i++) {
+    GtkWidget *row;
+
+    row = create_list_box_row (self, &row_table[i]);
+    gtk_list_box_insert (list_box, row, -1);
+  }
+}
+
+/* --- GObject --- */
 static void
 deap_window_dispose (GObject *object)
 {
@@ -68,7 +131,7 @@ deap_window_class_init (DeapWindowClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-window.ui");
   gtk_widget_class_bind_template_child (widget_class, DeapWindow, header_bar);
-  gtk_widget_class_bind_template_child (widget_class, DeapWindow, button_gnome_shell);
+  gtk_widget_class_bind_template_child (widget_class, DeapWindow, list_box);
 
   gtk_widget_class_bind_template_callback (widget_class, open_gnome_shell_dialog_cb);
 }
@@ -77,6 +140,8 @@ static void
 deap_window_init (DeapWindow *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  create_list_box (self);
 }
 
 GtkWidget *
