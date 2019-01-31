@@ -184,12 +184,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTreeView" id="ext_list_extensions">
+              <object class="GtkListBox" id="ext_list_extensions">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
-                </child>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>

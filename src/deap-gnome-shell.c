@@ -40,7 +40,7 @@ struct _DeapGnomeShell
   GtkLabel      *shell_version;
   GtkButton     *show_applications;
   GtkButton     *focus_search;
-  GtkTreeView   *ext_list_extensions;
+  GtkListBox    *ext_list_extensions;
 
   GPtrArray     *shell_ext_infos;
 };
