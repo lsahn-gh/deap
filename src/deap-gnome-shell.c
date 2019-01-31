@@ -36,7 +36,6 @@ struct _DeapGnomeShell
   GCancellable  *ext_cancellable;
 
   /* Widgets */
-  GtkWidget     *list_box;
   GtkLabel      *shell_version;
   GtkButton     *show_applications;
   GtkButton     *focus_search;
@@ -393,7 +392,6 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-gnome-shell.ui");
 
   /* org.gnome.Shell widgets */
-  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, list_box);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, shell_version);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, show_applications);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, focus_search);
