@@ -36,10 +36,10 @@ struct _DeapGnomeShell
   GCancellable  *ext_cancellable;
 
   /* Widgets */
-  GtkLabel      *shell_version;
-  GtkButton     *show_applications;
-  GtkButton     *focus_search;
-  GtkListBox    *exts_list_box;
+  GtkWidget     *shell_version;
+  GtkWidget     *show_applications;
+  GtkWidget     *focus_search;
+  GtkWidget     *exts_list_box;
 
   GPtrArray     *shell_ext_infos;
 };
@@ -278,7 +278,7 @@ get_shell_version (DeapGnomeShell *self)
   if (len == 0)
     return;
 
-  gtk_label_set_text (self->shell_version, ret);
+  gtk_label_set_text (GTK_LABEL (self->shell_version), ret);
 }
 
 static void
