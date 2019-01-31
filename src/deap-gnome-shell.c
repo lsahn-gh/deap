@@ -40,7 +40,7 @@ struct _DeapGnomeShell
   GtkLabel      *shell_version;
   GtkButton     *show_applications;
   GtkButton     *focus_search;
-  GtkListBox    *ext_list_extensions;
+  GtkListBox    *exts_list_box;
 
   GPtrArray     *shell_ext_infos;
 };
@@ -126,6 +126,38 @@ parse_datas_from_serialized_resource (GVariant *resource)
   return ret;
 }
 
+static GtkWidget *
+create_row_of_shell_exts_list (gpointer user_data)
+{
+  ShellExtInfo *info;
+  GtkWidget *row;
+  GtkWidget *name;
+
+  info = (ShellExtInfo *)user_data;
+
+  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+
+  name = gtk_label_new (info->name);
+  gtk_box_pack_start (GTK_BOX (row), name, TRUE, FALSE, 0);
+
+  gtk_widget_show_all (row);
+
+  return row;
+}
+
+static void
+add_row_into_shell_exts_list_func (gpointer data,
+                                   gpointer user_data)
+{
+  DeapGnomeShell *self;
+  GtkWidget *row;
+
+  self = DEAP_GNOME_SHELL (user_data);
+  row = create_row_of_shell_exts_list (data);
+
+  gtk_list_box_insert (GTK_LIST_BOX (self->exts_list_box), row, -1);
+}
+
 static void
 get_list_extensions_finish (GObject      *source,
                             GAsyncResult *res,
@@ -144,6 +176,8 @@ get_list_extensions_finish (GObject      *source,
   }
 
   self->shell_ext_infos = parse_datas_from_serialized_resource (ret);
+
+  g_ptr_array_foreach (self->shell_ext_infos, add_row_into_shell_exts_list_func, self);
 }
 
 static void
@@ -367,7 +401,7 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, execute_focus_search_cb);
 
   /* org.gnome.Shell.Extensions widgets */
-  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, ext_list_extensions);
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, exts_list_box);
 }
 
 static void
