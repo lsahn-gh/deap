@@ -36,11 +36,11 @@ struct _DeapGnomeShell
   GCancellable  *ext_cancellable;
 
   /* Widgets */
-  GtkWidget     *shell_version;
   GtkWidget     *show_applications;
   GtkWidget     *focus_search;
   GtkWidget     *exts_list_box;
 
+  gchar         *window_title;
   GPtrArray     *shell_ext_infos;
 };
 
@@ -278,7 +278,9 @@ get_shell_version (DeapGnomeShell *self)
   if (len == 0)
     return;
 
-  gtk_label_set_text (GTK_LABEL (self->shell_version), ret);
+  self->window_title = g_strdup_printf ("GNOME Shell %s", ret);
+
+  gtk_window_set_title (&self->parent_window, self->window_title);
 }
 
 static void
@@ -374,6 +376,11 @@ deap_gnome_shell_finalize (GObject *object)
     self->shell_ext_infos = NULL;
   }
 
+  if (self->window_title) {
+    g_free (self->window_title);
+    self->window_title = NULL;
+  }
+
   g_clear_object (&self->shell);
   g_clear_object (&self->ext_shell);
 
@@ -392,7 +399,6 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-gnome-shell.ui");
 
   /* org.gnome.Shell widgets */
-  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, shell_version);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, show_applications);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, focus_search);
   gtk_widget_class_bind_template_callback (widget_class, execute_show_applications_cb);
