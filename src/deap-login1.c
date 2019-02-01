@@ -27,10 +27,48 @@ struct _DeapLogin1
 {
   GtkWindow     parent_window;
 
+  /* org.freedesktop.login1 */
+  GDBusProxy    *login1;
+  GCancellable  *cancellable;
+
+  /* Widgets */
   GtkWidget     *lock_screen;
 };
 
 G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_WINDOW)
+
+static void
+login1_proxy_acquired_cb (GObject      *source,
+                          GAsyncResult *res,
+                          gpointer      user_data)
+{
+  DeapLogin1 *self = DEAP_LOGIN1 (user_data);
+  g_autoptr(GError) error = NULL;
+
+  self->login1 = g_dbus_proxy_new_for_bus_finish (res, &error);
+
+  if (error)
+    g_warning ("Error acquiring org.freedesktop.login1: %s", error->message);
+  else
+    g_info ("Acquired org.freedesktop.login1");
+}
+
+static void
+register_gdbus_proxies (DeapLogin1 *self)
+{
+  g_return_if_fail (self != NULL);
+
+  self->cancellable = g_cancellable_new ();
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL, /* GDBusInterfaceInfo */
+                            "org.freedesktop.login1",
+                            "/org/freedesktop/login1",
+                            "org.freedesktop.login1.Manager",
+                            self->cancellable,
+                            login1_proxy_acquired_cb,
+                            self);
+}
 
 /* --- GObject --- */
 static void
@@ -44,7 +82,12 @@ deap_login1_finalize (GObject *object)
 {
   DeapLogin1 *self = DEAP_LOGIN1 (object);
 
-  /* Do finalizing resources */
+  if (self->cancellable) {
+    g_cancellable_cancel (self->cancellable);
+    self->login1 = NULL;
+  }
+
+  g_clear_object (&self->login1);
 
   G_OBJECT_CLASS (deap_login1_parent_class)->finalize (object);
 }
@@ -61,13 +104,15 @@ deap_login1_class_init (DeapLogin1Class *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-login1.ui");
 
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, lock_screen);
-  /*gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);*/
+  gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);
 }
 
 static void
 deap_login1_init (DeapLogin1 *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  register_gdbus_proxies (self);
 }
 
 static GtkWidget *
