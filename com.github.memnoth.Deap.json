@@ -9,6 +9,7 @@
         "--share=ipc",
         "--socket=x11",
         "--socket=wayland",
+        "--system-talk-name=org.freedesktop.login1",
         "--talk-name=org.gnome.SessionManager",
         "--talk-name=org.gnome.Shell",
         "--filesystem=xdg-run/dconf",
