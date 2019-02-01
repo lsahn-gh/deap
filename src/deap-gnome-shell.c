@@ -258,29 +258,27 @@ execute_show_applications_cb (GtkButton *button,
  * Return gnome shell version
  * Ret type: String
  */
-static void
+static const gchar *
 get_shell_version (DeapGnomeShell *self)
 {
   g_autoptr(GVariant) gvar_ver = NULL;
   const gchar *ret;
   gsize len;
 
-  g_return_if_fail (self != NULL);
-  g_return_if_fail (self->shell != NULL);
+  g_return_val_if_fail (self != NULL, NULL);
+  g_return_val_if_fail (self->shell != NULL, NULL);
 
   gvar_ver = g_dbus_proxy_get_cached_property (self->shell, "ShellVersion");
   if (gvar_ver == NULL) {
     g_warning ("ShellVersion property is not cached yet");
-    return;
+    return NULL;
   }
 
   ret = g_variant_get_string (gvar_ver, &len);
   if (len == 0)
-    return;
+    return NULL;
 
-  self->window_title = g_strdup_printf ("GNOME Shell %s", ret);
-
-  gtk_window_set_title (&self->parent_window, self->window_title);
+  return ret;
 }
 
 static void
@@ -290,6 +288,7 @@ shell_proxy_acquired_cb (GObject      *source,
 {
   DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
   g_autoptr(GError) error = NULL;
+  const gchar *version;
 
   self->shell = g_dbus_proxy_new_for_bus_finish (res, &error);
 
@@ -297,7 +296,13 @@ shell_proxy_acquired_cb (GObject      *source,
     g_warning ("Error acquiring org.gnome.Shell: %s", error->message);
   else {
     g_info ("Acquired org.gnome.Shell");
-    get_shell_version (self);
+
+    if ((version = get_shell_version (self)) != NULL)
+      self->window_title = g_strdup_printf ("GNOME Shell %s", version);
+    else
+      self->window_title = g_strdup ("GNOME Shell");
+
+    gtk_window_set_title (&self->parent_window, self->window_title);
   }
 }
 
