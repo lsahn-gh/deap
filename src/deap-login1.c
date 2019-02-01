@@ -27,7 +27,7 @@ struct _DeapLogin1
 {
   GtkWindow     parent_window;
 
-
+  GtkWidget     *lock_screen;
 };
 
 G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_WINDOW)
@@ -46,6 +46,8 @@ deap_login1_class_init (DeapLogin1Class *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-login1.ui");
 
+  gtk_widget_class_bind_template_child (widget_class, DeapLogin1, lock_screen);
+  gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);
 }
 
 static void
