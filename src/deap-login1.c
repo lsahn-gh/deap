@@ -34,20 +34,34 @@ G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_WINDOW)
 
 /* --- GObject --- */
 static void
+deap_login1_dispose (GObject *object)
+{
+  G_OBJECT_CLASS (deap_login1_parent_class)->dispose (object);
+}
+
+static void
+deap_login1_finalize (GObject *object)
+{
+  DeapLogin1 *self = DEAP_LOGIN1 (object);
+
+  /* Do finalizing resources */
+
+  G_OBJECT_CLASS (deap_login1_parent_class)->finalize (object);
+}
+
+static void
 deap_login1_class_init (DeapLogin1Class *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  /*
   object_class->dispose = deap_login1_dispose;
   object_class->finalize = deap_login1_finalize;
-   */
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-login1.ui");
 
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, lock_screen);
-  gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);
+  /*gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);*/
 }
 
 static void
