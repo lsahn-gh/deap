@@ -13,12 +13,7 @@ deap_deps = [
   dependency('gtk+-3.0', version: '>= 3.22'),
 ]
 
-gnome = import('gnome')
-
-deap_sources += gnome.compile_resources('deap-resources',
-  'deap.gresource.xml',
-  c_name: 'deap'
-)
+subdir('ui')
 
 executable('deap', deap_sources,
   dependencies: deap_deps,
