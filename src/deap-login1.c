@@ -32,6 +32,7 @@ struct _DeapLogin1
   GCancellable  *cancellable;
 
   /* Widgets */
+  GtkWidget     *session_list;
   GtkWidget     *lock_screen;
   GtkWidget     *session_id_entry;
 };
@@ -137,6 +138,7 @@ deap_login1_class_init (DeapLogin1Class *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-login1.ui");
 
+  gtk_widget_class_bind_template_child (widget_class, DeapLogin1, session_list);
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, lock_screen);
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, session_id_entry);
   gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);
