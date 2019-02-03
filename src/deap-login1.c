@@ -33,9 +33,43 @@ struct _DeapLogin1
 
   /* Widgets */
   GtkWidget     *lock_screen;
+  GtkWidget     *session_id_entry;
 };
 
 G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_WINDOW)
+
+
+static void
+execute_lock_screen_cb (GtkWidget *button,
+                        gpointer   user_data)
+{
+  DeapLogin1 *self = DEAP_LOGIN1 (user_data);
+  const gchar *session_id;
+  const gchar *p;
+
+  session_id = gtk_entry_get_text (GTK_ENTRY (self->session_id_entry));
+  if (*session_id == '\0') {
+    g_warning ("Session ID entry is empty");
+    return;
+  }
+
+  /* Does it have any alphabets? if so, just return */
+  for (p = session_id; *p != '\0'; p++) {
+    if (!g_ascii_isdigit (*p)) {
+      g_warning ("Only numbers are allowed");
+      return;
+    }
+  }
+
+  g_dbus_proxy_call (self->login1,
+                     "LockSession",
+                     g_variant_new ("(s)", session_id),
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     NULL,
+                     self);
+}
 
 static void
 login1_proxy_acquired_cb (GObject      *source,
@@ -104,6 +138,7 @@ deap_login1_class_init (DeapLogin1Class *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/memnoth/Deap/deap-login1.ui");
 
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, lock_screen);
+  gtk_widget_class_bind_template_child (widget_class, DeapLogin1, session_id_entry);
   gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);
 }
 
