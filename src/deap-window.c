@@ -67,8 +67,7 @@ deap_window_dispose (GObject *object)
 {
   DeapWindow *self = DEAP_WINDOW (object);
 
-  g_clear_object (&self->gnome_shell);
-  g_clear_object (&self->login1);
+  (void)self;
 
   G_OBJECT_CLASS (deap_window_parent_class)->dispose (object);
 }
