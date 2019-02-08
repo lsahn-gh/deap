@@ -1,8 +1,3 @@
 Deap
 ----
-With this application, you can do,
-
-- Show all applications in grid layout in GNOME Shell
-- Get a focus of search
-- List all installed shell extensions
-- Lock your screen
+It's an application to hook gnome-shell via d-bus protocol.
