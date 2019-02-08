@@ -28,7 +28,6 @@ struct _DeapWindow
 
   /* Template widgets */
   GtkHeaderBar        *header_bar;
-  GtkListBox          *list_box;
 
   GtkWidget           *prefs_view;
 
