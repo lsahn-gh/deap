@@ -27,12 +27,12 @@
 
 struct _DeapApplication
 {
-  GtkApplication    parent_instance;
+  DzlApplication    parent_instance;
   
   GtkWidget         *window;
 };
 
-G_DEFINE_TYPE (DeapApplication, deap_application, GTK_TYPE_APPLICATION)
+G_DEFINE_TYPE (DeapApplication, deap_application, DZL_TYPE_APPLICATION)
 
 static void
 deap_application_startup (GApplication *application)

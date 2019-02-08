@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <dazzle.h>
 
 G_BEGIN_DECLS
 
 #define DEAP_TYPE_APPLICATION (deap_application_get_type ())
 
-G_DECLARE_FINAL_TYPE (DeapApplication, deap_application, DEAP, APPLICATION, GtkApplication)
+G_DECLARE_FINAL_TYPE (DeapApplication, deap_application, DEAP, APPLICATION, DzlApplication)
 
 DeapApplication *     deap_application_get_instance   (void);
 
