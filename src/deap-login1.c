@@ -85,7 +85,7 @@ login1_proxy_acquired_cb (GObject      *source,
   if (error)
     g_warning ("Error acquiring org.freedesktop.login1: %s", error->message);
   else
-    g_info ("Acquired org.freedesktop.login1");
+    g_info ("org.freedesktop.login1 successfully acquired");
 }
 
 static void
