@@ -366,15 +366,14 @@ deap_gnome_shell_finalize (GObject *object)
 {
   DeapGnomeShell *self = DEAP_GNOME_SHELL (object);
 
-  if (self->cancellable) {
-    g_cancellable_cancel (self->cancellable);
-    g_clear_object (&self->cancellable);
-  }
+  g_cancellable_cancel (self->cancellable);
+  g_clear_object (&self->cancellable);
 
-  if (self->ext_cancellable) {
-    g_cancellable_cancel (self->ext_cancellable);
-    g_clear_object (&self->ext_cancellable);
-  }
+  g_cancellable_cancel (self->ext_cancellable);
+  g_clear_object (&self->ext_cancellable);
+
+  g_clear_object (&self->shell);
+  g_clear_object (&self->ext_shell);
 
   if (self->shell_ext_infos) {
     g_ptr_array_unref (self->shell_ext_infos);
@@ -385,9 +384,6 @@ deap_gnome_shell_finalize (GObject *object)
     g_free (self->window_title);
     self->window_title = NULL;
   }
-
-  g_clear_object (&self->shell);
-  g_clear_object (&self->ext_shell);
 
   G_OBJECT_CLASS (deap_gnome_shell_parent_class)->finalize (object);
 }
