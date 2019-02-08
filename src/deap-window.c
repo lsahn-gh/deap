@@ -30,10 +30,10 @@ struct _DeapWindow
   GtkHeaderBar        *header_bar;
   GtkListBox          *list_box;
 
-  GtkWidget           *login1_window;
   GtkWidget           *prefs_view;
 
   GtkWidget           *gnome_shell;
+  GtkWidget           *login1;
 };
 
 typedef struct
@@ -69,7 +69,7 @@ deap_window_dispose (GObject *object)
   DeapWindow *self = DEAP_WINDOW (object);
 
   g_clear_object (&self->gnome_shell);
-  g_clear_object (&self->login1_window);
+  g_clear_object (&self->login1);
 
   G_OBJECT_CLASS (deap_window_parent_class)->dispose (object);
 }
@@ -101,6 +101,9 @@ deap_window_init (DeapWindow *self)
 
   self->gnome_shell = deap_gnome_shell_get_instance ();
   item_table[0].widget = self->gnome_shell;
+
+  self->login1 = deap_login1_get_instance ();
+  item_table[1].widget = self->login1;
 
   add_preferences (DZL_PREFERENCES (self->prefs_view), item_table);
 }
