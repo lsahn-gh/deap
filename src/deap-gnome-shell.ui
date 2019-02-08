@@ -52,6 +52,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_markup" translatable="yes">Execute &lt;b&gt;Show Applications&lt;/b&gt; of GNOME Shell</property>
+                        <signal name="clicked" handler="execute_show_applications_cb" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -66,6 +67,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_markup" translatable="yes">Execute &lt;b&gt;Focus Search&lt;/b&gt; of GNOME Shell</property>
+                        <signal name="clicked" handler="execute_focus_search_cb" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
