@@ -10,6 +10,7 @@ With this application, you can do,
 Install
 -------
 $ git clone https://github.com/memnoth/gdbus-proxy-examples.git
+$ cd gdbus-proxy-examples
 $ flatpak-builder ./_build com.github.memnoth.Deap.json
 
 Run
