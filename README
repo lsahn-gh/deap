@@ -6,3 +6,12 @@ With this application, you can do,
 - Get a focus of search in gnome shell
 - List all installed gnome shell extensions
 - Lock your screen
+
+Install
+-------
+$ git clone https://github.com/memnoth/gdbus-proxy-examples.git
+$ flatpak-builder ./_build com.github.memnoth.Deap.json
+
+Run
+---
+$ flatpak-builder --run ./_build com.github.memnoth.Deap.json deap
