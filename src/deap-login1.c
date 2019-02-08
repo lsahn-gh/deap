@@ -25,7 +25,7 @@
 
 struct _DeapLogin1
 {
-  GtkWindow     parent_window;
+  GtkBox        parent_instance;
 
   /* org.freedesktop.login1 */
   GDBusProxy    *login1;
@@ -37,7 +37,7 @@ struct _DeapLogin1
   GtkWidget     *session_id_entry;
 };
 
-G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_WINDOW)
+G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_BOX)
 
 
 static void

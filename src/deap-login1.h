@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 
 #define DEAP_TYPE_LOGIN1 (deap_login1_get_type ())
 
-G_DECLARE_FINAL_TYPE (DeapLogin1, deap_login1, DEAP, LOGIN1, GtkWindow)
+G_DECLARE_FINAL_TYPE (DeapLogin1, deap_login1, DEAP, LOGIN1, GtkBox)
 
 GtkWidget *     deap_login1_get_instance    (void);
 
