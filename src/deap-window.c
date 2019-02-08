@@ -42,14 +42,14 @@ typedef struct
   const gchar *description;
   const gchar *page_name;
   GtkWidget   *widget;
-} RowData;
+} PrefsItem;
 
 G_DEFINE_TYPE (DeapWindow, deap_window, GTK_TYPE_APPLICATION_WINDOW)
 
 
 static void
-add_preferences (DzlPreferences *prefs,
-                 const RowData  *items)
+add_preferences (DzlPreferences  *prefs,
+                 const PrefsItem *items)
 {
   gsize i;
 
@@ -93,16 +93,16 @@ deap_window_init (DeapWindow *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   /* title, description, page_name, widget */
-  static RowData row_table[] = {
+  static PrefsItem item_table[] = {
       { "org.gnome.Shell", "", "gnome-shell", NULL },
       { "org.freedesktop.login1", "", "freedesktop-login1", NULL },
       { NULL }
   };
 
   self->gnome_shell = deap_gnome_shell_get_instance ();
-  row_table[0].widget = self->gnome_shell;
+  item_table[0].widget = self->gnome_shell;
 
-  add_preferences (DZL_PREFERENCES (self->prefs_view), row_table);
+  add_preferences (DZL_PREFERENCES (self->prefs_view), item_table);
 }
 
 GtkWidget *
