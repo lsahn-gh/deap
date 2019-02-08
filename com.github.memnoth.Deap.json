@@ -37,6 +37,23 @@
     ],
     "modules": [
         {
+            "name": "libdazzle",
+            "buildsystem": "meson",
+            "config-opts": [
+                "-Denable_tracing=false",
+                "-Denable_profiling=false",
+                "-Denable_tests=false",
+                "-Dwith_introspection=false",
+                "-Dwith_vapi=false"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/libdazzle.git"
+                }
+            ]
+        },
+        {
             "name": "deap",
             "buildsystem": "meson",
             "config-opts": [ "--libdir=lib" ],
