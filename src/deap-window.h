@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <dazzle.h>
 
 #include "deap-application.h"
 
