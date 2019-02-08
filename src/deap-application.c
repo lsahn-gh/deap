@@ -70,19 +70,8 @@ deap_application_init (DeapApplication *self)
   
 }
 
-static DeapApplication *
+DeapApplication *
 deap_application_new (void)
 {
   return DEAP_APPLICATION (g_object_new (DEAP_TYPE_APPLICATION, NULL));
-}
-
-DeapApplication *
-deap_application_get_instance (void)
-{
-  static DeapApplication *instance = NULL;
-  
-  if (instance == NULL)
-    instance = deap_application_new ();
-  
-  return instance;
 }

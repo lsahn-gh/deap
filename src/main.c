@@ -33,7 +33,7 @@ main (int   argc,
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	app = deap_application_get_instance ();
+	app = deap_application_new ();
 
 	ret = g_application_run (G_APPLICATION (app), argc, argv);
 
