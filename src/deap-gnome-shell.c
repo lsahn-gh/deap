@@ -25,7 +25,7 @@
 
 struct _DeapGnomeShell
 {
-  GtkWindow     parent_window;
+  GtkBox        parent_instance;
 
   /* org.gnome.Shell */
   GDBusProxy    *shell;
@@ -52,7 +52,7 @@ typedef struct
   gchar *uuid;
 } ShellExtInfo;
 
-G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_WINDOW)
+G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_BOX)
 
 /* value must be {sv} type. */
 static gpointer
@@ -301,8 +301,6 @@ shell_proxy_acquired_cb (GObject      *source,
       self->window_title = g_strdup_printf ("GNOME Shell %s", version);
     else
       self->window_title = g_strdup ("GNOME Shell");
-
-    gtk_window_set_title (&self->parent_window, self->window_title);
   }
 }
 

@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 
 #define DEAP_TYPE_GNOME_SHELL (deap_gnome_shell_get_type ())
 
-G_DECLARE_FINAL_TYPE (DeapGnomeShell, deap_gnome_shell, DEAP, GNOME_SHELL, GtkWindow)
+G_DECLARE_FINAL_TYPE (DeapGnomeShell, deap_gnome_shell, DEAP, GNOME_SHELL, GtkBox)
 
 GtkWidget *     deap_gnome_shell_get_instance   (void);
 
