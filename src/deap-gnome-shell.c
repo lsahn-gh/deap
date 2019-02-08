@@ -295,7 +295,7 @@ shell_proxy_acquired_cb (GObject      *source,
   if (error)
     g_warning ("Error acquiring org.gnome.Shell: %s", error->message);
   else {
-    g_info ("Acquired org.gnome.Shell");
+    g_info ("org.gnome.Shell successfully acquired");
 
     if ((version = get_shell_version (self)) != NULL)
       self->window_title = g_strdup_printf ("GNOME Shell %s", version);
@@ -317,7 +317,7 @@ ext_shell_proxy_acquired_cb (GObject      *source,
   if (error)
     g_warning ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
   else {
-    g_info ("Acquired org.gnome.Shell.Extensions");
+    g_info ("org.gnome.Shell.Extensions successfully acquired");
     ext_get_list_extensions (self);
   }
 }
