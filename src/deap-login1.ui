@@ -2,16 +2,11 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <template class="DeapLogin1" parent="GtkWindow">
+  <template class="DeapLogin1" parent="GtkBox">
+    <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="border_width">10</property>
-    <property name="type">popup</property>
-    <property name="title" translatable="yes">Freedesktop Login1</property>
-    <property name="default_width">500</property>
-    <property name="default_height">250</property>
-    <child>
-      <placeholder/>
-    </child>
+    <property name="orientation">vertical</property>
+    <property name="homogeneous">True</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -146,6 +141,11 @@
           </packing>
         </child>
       </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
     </child>
   </template>
 </interface>
