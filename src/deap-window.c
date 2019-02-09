@@ -30,9 +30,6 @@ struct _DeapWindow
   GtkHeaderBar        *header_bar;
 
   GtkWidget           *prefs_view;
-
-  GtkWidget           *gnome_shell;
-  GtkWidget           *login1;
 };
 
 typedef struct
@@ -97,11 +94,8 @@ deap_window_init (DeapWindow *self)
       { NULL }
   };
 
-  self->gnome_shell = deap_gnome_shell_get_instance ();
-  item_table[0].widget = self->gnome_shell;
-
-  self->login1 = deap_login1_get_instance ();
-  item_table[1].widget = self->login1;
+  item_table[0].widget = deap_gnome_shell_get_instance ();
+  item_table[1].widget = deap_login1_get_instance ();
 
   add_preferences (DZL_PREFERENCES (self->prefs_view), item_table);
 }
