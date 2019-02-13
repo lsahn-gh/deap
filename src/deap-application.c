@@ -19,11 +19,15 @@
  */
 
 #include "deap-config.h"
+#include "deap-debug.h"
 #include "deap-application.h"
 #include "deap-window.h"
 
+#include "gtd-log.h"
+
 #include <glib.h>
 #include <glib-object.h>
+#include <glib/gi18n.h>
 
 struct _DeapApplication
 {
@@ -55,6 +59,16 @@ deap_application_activate (GApplication *application)
   gtk_window_present (GTK_WINDOW (self->window));
 }
 
+static gint
+deap_application_handle_local_options (GApplication *application,
+                                       GVariantDict *options)
+{
+  if (g_variant_dict_contains (options, "debug"))
+    gtd_log_init ();
+
+  return -1;
+}
+
 static void
 deap_application_class_init (DeapApplicationClass *klass)
 {
@@ -62,12 +76,18 @@ deap_application_class_init (DeapApplicationClass *klass)
   
   application_class->startup = deap_application_startup;
   application_class->activate = deap_application_activate;
+  application_class->handle_local_options = deap_application_handle_local_options;
 }
 
 static void
 deap_application_init (DeapApplication *self)
 {
+  static GOptionEntry command_options[] = {
+      { "debug", 'd', 0, G_OPTION_ARG_NONE, NULL, N_("Enable debug mode"), NULL },
+      { NULL }
+  };
   
+  g_application_add_main_option_entries (G_APPLICATION (self), command_options);
 }
 
 DeapApplication *
