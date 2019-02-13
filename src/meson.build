@@ -6,6 +6,15 @@ deap_sources = [
   'deap-login1.c',
 ]
 
+deap_sources += [
+  'logging/gtd-log.c',
+]
+
+includes = include_directories(
+  '.',
+  'logging',
+)
+
 deap_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
@@ -19,7 +28,9 @@ deap_sources += gnome.compile_resources('deap-resources',
   c_name: 'deap'
 )
 
-executable('deap', deap_sources,
+executable('deap',
+  deap_sources,
+  include_directories: includes,
   dependencies: deap_deps,
   install: true,
 )
