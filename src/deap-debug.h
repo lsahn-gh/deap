@@ -64,6 +64,9 @@ G_BEGIN_DECLS
 #define deap_error_msg(fmt, ...) \
   g_error("  MSG: %s(): %d: " fmt, G_STRFUNC, __LINE__, ##__VA_ARGS__)
 
+#define deap_warn_msg(fmt, ...) \
+  g_warning ("  MSG: %s(): %d: " fmt, G_STRFUNC, __LINE__, ##__VA_ARGS__)
+
 #define deap_critical_msg(fmt, ...) \
   g_critical("  MSG: %s(): %d: " fmt, G_STRFUNC, __LINE__, ##__VA_ARGS__)
 
