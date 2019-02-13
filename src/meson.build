@@ -4,8 +4,6 @@ deap_sources = [
   'deap-window.c',
   'deap-gnome-shell.c',
   'deap-login1.c',
-
-  'interfaces/deap-registrable.c',
 ]
 
 deap_deps = [
