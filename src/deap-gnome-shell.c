@@ -39,6 +39,7 @@ struct _DeapGnomeShell
   GtkWidget     *show_applications;
   GtkWidget     *focus_search;
   GtkWidget     *exts_list_box;
+  GtkWidget     *popover_menu;
 
   gchar         *window_title;
   GPtrArray     *shell_ext_infos;
@@ -322,6 +323,28 @@ ext_shell_proxy_acquired_cb (GObject      *source,
   }
 }
 
+static gboolean
+on_listbox_button_press_cb (GtkWidget      *widget,
+                            GdkEventButton *event,
+                            gpointer        user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+
+  if (event->button == 3) {
+    GtkListBoxRow *row = gtk_list_box_get_selected_row (GTK_LIST_BOX (self->exts_list_box));
+
+    if (row == NULL)
+      return FALSE;
+
+    gtk_popover_set_relative_to (GTK_POPOVER (self->popover_menu), GTK_WIDGET (row));
+    gtk_popover_popup (GTK_POPOVER (self->popover_menu));
+
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
 static void
 register_gdbus_proxies (DeapGnomeShell *self)
 {
@@ -400,8 +423,10 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   /* org.gnome.Shell widgets */
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, show_applications);
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, focus_search);
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, popover_menu);
   gtk_widget_class_bind_template_callback (widget_class, execute_show_applications_cb);
   gtk_widget_class_bind_template_callback (widget_class, execute_focus_search_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_listbox_button_press_cb);
 
   /* org.gnome.Shell.Extensions widgets */
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, exts_list_box);
