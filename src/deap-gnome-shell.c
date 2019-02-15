@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN "DeapGnomeShell"
 
 #include "deap-config.h"
+#include "deap-debug.h"
 #include "deap-gnome-shell.h"
 
 #include <gio/gio.h>
@@ -341,6 +342,54 @@ shell_proxy_acquired_cb (GObject      *source,
 
 
 /* --- Callbacks for Widgets --- */
+static const gchar *
+get_uuid_from_row (GtkListBoxRow *row)
+{
+  return g_object_get_data (G_OBJECT (row), "uuid");
+}
+
+static gboolean
+is_uuid_in_row (GtkListBoxRow *row)
+{
+  return get_uuid_from_row (row) != NULL;
+}
+
+static void
+extension_option_launch_cb (GSimpleAction *action,
+                                   GVariant      *parameter,
+                                   gpointer       user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+  GtkListBoxRow *row = NULL;
+  const gchar *uuid = NULL;
+
+  DEAP_TRACE_ENTRY;
+
+  row = gtk_list_box_get_selected_row (GTK_LIST_BOX (self->extension_list_box));
+  if (row == NULL) {
+    deap_warn_msg ("There is no selected row");
+    return;
+  }
+
+  uuid = get_uuid_from_row (row);
+  if (uuid == NULL) {
+    deap_warn_msg ("The selected row has no UUID");
+    return;
+  }
+
+  g_dbus_proxy_call (self->shell_extension,
+                     "LaunchExtensionPrefs",
+                     g_variant_new ("(s)", g_strdup (uuid)),
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     NULL,
+                     NULL);
+  deap_trace_msg ("UUID: %s", uuid);
+
+  DEAP_TRACE_EXIT;
+}
+
 static gboolean
 on_listbox_button_press_cb (GtkWidget      *widget,
                             GdkEventButton *event,
@@ -367,10 +416,10 @@ static void
 update_selection_actions (GActionGroup *action_group,
                           gboolean      has_selection)
 {
-  GAction *execute_action;
+  GAction *launch_action;
 
-  execute_action = g_action_map_lookup_action (G_ACTION_MAP (action_group), "execute");
-  g_simple_action_set_enabled (G_SIMPLE_ACTION (execute_action), has_selection);
+  launch_action = g_action_map_lookup_action (G_ACTION_MAP (action_group), "launch");
+  g_simple_action_set_enabled (G_SIMPLE_ACTION (launch_action), has_selection);
 }
 
 static void
@@ -380,7 +429,7 @@ on_listbox_row_selected_cb (GtkListBox    *box,
 {
   DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
 
-  update_selection_actions (self->action_group, row != NULL);
+  update_selection_actions (self->action_group, row != NULL && is_uuid_in_row (row));
 }
 /* --- End of Callbacks --- */
 
@@ -447,7 +496,7 @@ static void
 create_action_group (DeapGnomeShell *self)
 {
   const GActionEntry entries[] = {
-      { "launch", NULL }
+      { "launch", extension_option_launch_cb }
   };
   GSimpleActionGroup *group;
 
