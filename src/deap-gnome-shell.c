@@ -134,19 +134,24 @@ parse_datas_from_serialized_resource (GVariant *resource)
 }
 
 static GtkWidget *
-create_row_of_shell_exts_list (gpointer user_data)
+create_shell_exts_list_row (gpointer user_data)
 {
   ShellExtInfo *info;
   GtkWidget *row;
+  GtkWidget *hbox;
   GtkWidget *name;
 
   info = (ShellExtInfo *)user_data;
 
-  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  row = gtk_list_box_row_new ();
+  g_object_set_data (G_OBJECT (row), "uuid", g_strdup (info->uuid));
+
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
   name = gtk_label_new (info->name);
-  gtk_box_pack_start (GTK_BOX (row), name, TRUE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), name, TRUE, FALSE, 0);
 
+  gtk_container_add (GTK_CONTAINER (row), hbox);
   gtk_widget_show_all (row);
 
   return row;
@@ -160,7 +165,7 @@ add_row_into_shell_exts_list_func (gpointer data,
   GtkWidget *row;
 
   self = DEAP_GNOME_SHELL (user_data);
-  row = create_row_of_shell_exts_list (data);
+  row = create_shell_exts_list_row (data);
 
   gtk_list_box_insert (GTK_LIST_BOX (self->exts_list_box), row, -1);
 }
