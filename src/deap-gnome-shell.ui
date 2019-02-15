@@ -145,7 +145,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkListBox" id="exts_list_box">
+                      <object class="GtkListBox" id="extension_list_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <signal name="button-press-event" handler="on_listbox_button_press_cb" swapped="no"/>
@@ -189,8 +189,8 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">extension.execute</property>
-            <property name="text" translatable="yes">Execute</property>
+            <property name="action_name">extension.launch</property>
+            <property name="text" translatable="yes">Launch</property>
           </object>
           <packing>
             <property name="expand">False</property>

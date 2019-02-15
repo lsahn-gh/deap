@@ -34,19 +34,19 @@ struct _DeapGnomeShell
   GCancellable  *cancellable;
 
   /* org.gnome.Shell.Extensions */
-  GDBusProxy    *ext_shell;
-  GCancellable  *ext_cancellable;
+  GDBusProxy    *shell_extension;
+  GCancellable  *extension_cancellable;
 
   /* Widgets */
   GtkWidget     *show_applications;
   GtkWidget     *focus_search;
-  GtkWidget     *exts_list_box;
+  GtkWidget     *extension_list_box;
   GtkWidget     *popover_menu;
 
   GActionGroup  *action_group;
 
   gchar         *window_title;
-  GPtrArray     *shell_ext_infos;
+  GPtrArray     *shell_extension_infos;
 };
 
 typedef struct
@@ -55,24 +55,25 @@ typedef struct
   gchar *description;
   gchar *url;
   gchar *uuid;
-} ShellExtInfo;
+} ShellExtensionInfo;
 
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_BOX)
 
 #define G_PTR_ARRAY_GET_LENGTH(_arrptr)   ((_arrptr)->len)
-#define SHELL_EXT_INFO(_val)              ((ShellExtInfo*)_val)
+#define SHELL_EXTENSION_INFO(_val)        ((ShellExtensionInfo*)_val)
 
-/* value must be {sv} type. */
+
+/* --- Shell Extension Proxy --- */
 static gpointer
-shell_ext_info_new (GVariant *value)
+shell_extension_info_new (GVariant *value   /* {sv} type */)
 {
-  ShellExtInfo *info;
+  ShellExtensionInfo *info;
   gchar *name;
   gchar *description;
   gchar *url;
   gchar *uuid;
 
-  info = g_new0 (ShellExtInfo, 1);
+  info = g_new0 (ShellExtensionInfo, 1);
 
   g_variant_lookup (value, "name", "s", &name);
   g_variant_lookup (value, "description", "s", &description);
@@ -88,9 +89,9 @@ shell_ext_info_new (GVariant *value)
 }
 
 static void
-shell_ext_info_free (gpointer user_data)
+shell_extension_info_free (gpointer user_data)
 {
-  ShellExtInfo *info = (ShellExtInfo *)user_data;
+  ShellExtensionInfo *info = (ShellExtensionInfo *)user_data;
 
   g_free (info->name);
   g_free (info->description);
@@ -100,7 +101,7 @@ shell_ext_info_free (gpointer user_data)
 }
 
 static GPtrArray *
-parse_datas_from_serialized_resource (GVariant *resource)
+parse_from_serialized_dbus_data (GVariant *resource)
 {
   g_autoptr(GVariant) dict = NULL;
   g_autoptr(GVariantIter) iter = NULL;
@@ -114,7 +115,7 @@ parse_datas_from_serialized_resource (GVariant *resource)
   g_variant_get (resource, "(@a{?*})", &dict);
   len = g_variant_n_children (dict);
 
-  ret = g_ptr_array_new_full (len, shell_ext_info_free);
+  ret = g_ptr_array_new_full (len, shell_extension_info_free);
 
   iter = g_variant_iter_new (dict);
   while ((child = g_variant_iter_next_value (iter))) {
@@ -124,7 +125,7 @@ parse_datas_from_serialized_resource (GVariant *resource)
 
     g_variant_get (child, "{s@a{?*}}", &key, &val);
 
-    p = shell_ext_info_new (val);
+    p = shell_extension_info_new (val);
     g_ptr_array_add (ret, p);
 
     g_variant_unref (child);
@@ -134,14 +135,14 @@ parse_datas_from_serialized_resource (GVariant *resource)
 }
 
 static GtkWidget *
-create_shell_exts_list_row (gpointer user_data)
+create_extension_list_row (gpointer user_data)
 {
-  ShellExtInfo *info;
+  ShellExtensionInfo *info;
   GtkWidget *row;
   GtkWidget *hbox;
   GtkWidget *name;
 
-  info = (ShellExtInfo *)user_data;
+  info = (ShellExtensionInfo *)user_data;
 
   row = gtk_list_box_row_new ();
   g_object_set_data (G_OBJECT (row), "uuid", g_strdup (info->uuid));
@@ -158,28 +159,28 @@ create_shell_exts_list_row (gpointer user_data)
 }
 
 static void
-add_row_into_shell_exts_list_func (gpointer data,
-                                   gpointer user_data)
+add_row_into_extension_list_func (gpointer data,
+                                  gpointer user_data)
 {
   DeapGnomeShell *self;
   GtkWidget *row;
 
   self = DEAP_GNOME_SHELL (user_data);
-  row = create_shell_exts_list_row (data);
+  row = create_extension_list_row (data);
 
-  gtk_list_box_insert (GTK_LIST_BOX (self->exts_list_box), row, -1);
+  gtk_list_box_insert (GTK_LIST_BOX (self->extension_list_box), row, -1);
 }
 
 static void
-get_list_extensions_finish (GObject      *source,
-                            GAsyncResult *res,
-                            gpointer      user_data)
+get_extension_list_finish (GObject      *source,
+                           GAsyncResult *res,
+                           gpointer      user_data)
 {
   DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
   g_autoptr(GVariant) ret = NULL;
   g_autoptr(GError) error = NULL;
 
-  ret = g_dbus_proxy_call_finish (self->ext_shell,
+  ret = g_dbus_proxy_call_finish (self->shell_extension,
                                         res,
                                         &error);
   if (error) {
@@ -187,26 +188,46 @@ get_list_extensions_finish (GObject      *source,
     return;
   }
 
-  self->shell_ext_infos = parse_datas_from_serialized_resource (ret);
-
-  g_ptr_array_foreach (self->shell_ext_infos, add_row_into_shell_exts_list_func, self);
+  self->shell_extension_infos = parse_from_serialized_dbus_data (ret);
+  g_ptr_array_foreach (self->shell_extension_infos, add_row_into_extension_list_func, self);
 }
 
 static void
-ext_get_list_extensions (DeapGnomeShell *self)
+get_extension_list (DeapGnomeShell *self)
 {
   g_return_if_fail (self != NULL);
 
-  g_dbus_proxy_call (self->ext_shell,
+  g_dbus_proxy_call (self->shell_extension,
                      "ListExtensions",
                      NULL,
                      G_DBUS_CALL_FLAGS_NONE,
                      -1,
                      NULL,
-                     (GAsyncReadyCallback) get_list_extensions_finish,
+                     (GAsyncReadyCallback) get_extension_list_finish,
                      self);
 }
 
+static void
+shell_extension_proxy_acquired_cb (GObject      *source,
+                                   GAsyncResult *res,
+                                   gpointer      user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+  g_autoptr(GError) error = NULL;
+
+  self->shell_extension = g_dbus_proxy_new_for_bus_finish (res, &error);
+
+  if (error)
+    g_warning ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
+  else {
+    g_info ("org.gnome.Shell.Extensions successfully acquired");
+    get_extension_list (self);
+  }
+}
+/* --- End of Shell Extension Proxy --- */
+
+
+/* --- Shell Proxy --- */
 /*
  * execute_focus_search_cb
  *
@@ -316,25 +337,10 @@ shell_proxy_acquired_cb (GObject      *source,
       self->window_title = g_strdup ("GNOME Shell");
   }
 }
+/* --- End of Shell Proxy --- */
 
-static void
-ext_shell_proxy_acquired_cb (GObject      *source,
-                             GAsyncResult *res,
-                             gpointer      user_data)
-{
-  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
-  g_autoptr(GError) error = NULL;
 
-  self->ext_shell = g_dbus_proxy_new_for_bus_finish (res, &error);
-
-  if (error)
-    g_warning ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
-  else {
-    g_info ("org.gnome.Shell.Extensions successfully acquired");
-    ext_get_list_extensions (self);
-  }
-}
-
+/* --- Callbacks for Widgets --- */
 static gboolean
 on_listbox_button_press_cb (GtkWidget      *widget,
                             GdkEventButton *event,
@@ -343,7 +349,7 @@ on_listbox_button_press_cb (GtkWidget      *widget,
   DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
 
   if (event->button == 3) {
-    GtkListBoxRow *row = gtk_list_box_get_selected_row (GTK_LIST_BOX (self->exts_list_box));
+    GtkListBoxRow *row = gtk_list_box_get_selected_row (GTK_LIST_BOX (self->extension_list_box));
 
     if (row == NULL)
       return FALSE;
@@ -376,36 +382,8 @@ on_listbox_row_selected_cb (GtkListBox    *box,
 
   update_selection_actions (self->action_group, row != NULL);
 }
+/* --- End of Callbacks --- */
 
-static void
-register_gdbus_proxies (DeapGnomeShell *self)
-{
-  g_return_if_fail (self != NULL);
-
-  /* org.gnome.Shell */
-  self->cancellable = g_cancellable_new ();
-  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                            G_DBUS_PROXY_FLAGS_NONE,
-                            NULL, /* GDBusInterfaceInfo */
-                            "org.gnome.Shell",
-                            "/org/gnome/Shell",
-                            "org.gnome.Shell",
-                            self->cancellable,
-                            shell_proxy_acquired_cb, /* Callback */
-                            self);
-
-  /* org.gnome.Shell.Extensions */
-  self->ext_cancellable = g_cancellable_new ();
-  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                            G_DBUS_PROXY_FLAGS_NONE,
-                            NULL,
-                            "org.gnome.Shell",
-                            "/org/gnome/Shell",
-                            "org.gnome.Shell.Extensions",
-                            self->ext_cancellable,
-                            ext_shell_proxy_acquired_cb,
-                            self);
-}
 
 /* --- GObjet --- */
 static void
@@ -422,15 +400,15 @@ deap_gnome_shell_finalize (GObject *object)
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
 
-  g_cancellable_cancel (self->ext_cancellable);
-  g_clear_object (&self->ext_cancellable);
+  g_cancellable_cancel (self->extension_cancellable);
+  g_clear_object (&self->extension_cancellable);
 
   g_clear_object (&self->shell);
-  g_clear_object (&self->ext_shell);
+  g_clear_object (&self->shell_extension);
 
-  if (self->shell_ext_infos) {
-    g_ptr_array_unref (self->shell_ext_infos);
-    self->shell_ext_infos = NULL;
+  if (self->shell_extension_infos) {
+    g_ptr_array_unref (self->shell_extension_infos);
+    self->shell_extension_infos = NULL;
   }
 
   if (self->window_title) {
@@ -462,14 +440,14 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_selected_cb);
 
   /* org.gnome.Shell.Extensions widgets */
-  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, exts_list_box);
+  gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, extension_list_box);
 }
 
 static void
 create_action_group (DeapGnomeShell *self)
 {
   const GActionEntry entries[] = {
-      { "execute", NULL }
+      { "launch", NULL }
   };
   GSimpleActionGroup *group;
 
@@ -478,6 +456,36 @@ create_action_group (DeapGnomeShell *self)
 
   self->action_group = G_ACTION_GROUP (group);
   gtk_widget_insert_action_group (GTK_WIDGET (self), "extension", self->action_group);
+}
+
+static void
+register_gdbus_proxies (DeapGnomeShell *self)
+{
+  g_return_if_fail (self != NULL);
+
+  /* org.gnome.Shell */
+  self->cancellable = g_cancellable_new ();
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL, /* GDBusInterfaceInfo */
+                            "org.gnome.Shell",
+                            "/org/gnome/Shell",
+                            "org.gnome.Shell",
+                            self->cancellable,
+                            shell_proxy_acquired_cb, /* Callback */
+                            self);
+
+  /* org.gnome.Shell.Extensions */
+  self->extension_cancellable = g_cancellable_new ();
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL,
+                            "org.gnome.Shell",
+                            "/org/gnome/Shell",
+                            "org.gnome.Shell.Extensions",
+                            self->extension_cancellable,
+                            shell_extension_proxy_acquired_cb,
+                            self);
 }
 
 static void
