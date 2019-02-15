@@ -46,7 +46,7 @@ struct _DeapGnomeShell
 
   GActionGroup  *action_group;
 
-  gchar         *window_title;
+  gchar         *shell_version;
   GPtrArray     *shell_extension_infos;
 };
 
@@ -323,7 +323,6 @@ shell_proxy_acquired_cb (GObject      *source,
 {
   DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
   g_autoptr(GError) error = NULL;
-  const gchar *version;
 
   self->shell = g_dbus_proxy_new_for_bus_finish (res, &error);
 
@@ -331,11 +330,7 @@ shell_proxy_acquired_cb (GObject      *source,
     g_warning ("Error acquiring org.gnome.Shell: %s", error->message);
   else {
     g_info ("org.gnome.Shell successfully acquired");
-
-    if ((version = get_shell_version (self)) != NULL)
-      self->window_title = g_strdup_printf ("GNOME Shell %s", version);
-    else
-      self->window_title = g_strdup ("GNOME Shell");
+    self->shell_version = g_strdup (get_shell_version (self));
   }
 }
 /* --- End of Shell Proxy --- */
@@ -460,9 +455,9 @@ deap_gnome_shell_finalize (GObject *object)
     self->shell_extension_infos = NULL;
   }
 
-  if (self->window_title) {
-    g_free (self->window_title);
-    self->window_title = NULL;
+  if (self->shell_version) {
+    g_free (self->shell_version);
+    self->shell_version = NULL;
   }
 
   G_OBJECT_CLASS (deap_gnome_shell_parent_class)->finalize (object);
