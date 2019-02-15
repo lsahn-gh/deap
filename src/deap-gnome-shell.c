@@ -43,6 +43,8 @@ struct _DeapGnomeShell
   GtkWidget     *exts_list_box;
   GtkWidget     *popover_menu;
 
+  GActionGroup  *action_group;
+
   gchar         *window_title;
   GPtrArray     *shell_ext_infos;
 };
@@ -56,6 +58,9 @@ typedef struct
 } ShellExtInfo;
 
 G_DEFINE_TYPE (DeapGnomeShell, deap_gnome_shell, GTK_TYPE_BOX)
+
+#define G_PTR_ARRAY_GET_LENGTH(_arrptr)   ((_arrptr)->len)
+#define SHELL_EXT_INFO(_val)              ((ShellExtInfo*)_val)
 
 /* value must be {sv} type. */
 static gpointer
@@ -348,6 +353,26 @@ on_listbox_button_press_cb (GtkWidget      *widget,
 }
 
 static void
+update_selection_actions (GActionGroup *action_group,
+                          gboolean      has_selection)
+{
+  GAction *execute_action;
+
+  execute_action = g_action_map_lookup_action (G_ACTION_MAP (action_group), "execute");
+  g_simple_action_set_enabled (G_SIMPLE_ACTION (execute_action), has_selection);
+}
+
+static void
+on_listbox_row_selected_cb (GtkListBox    *box,
+                            GtkListBoxRow *row,
+                            gpointer       user_data)
+{
+  DeapGnomeShell *self = DEAP_GNOME_SHELL (user_data);
+
+  update_selection_actions (self->action_group, row != NULL);
+}
+
+static void
 register_gdbus_proxies (DeapGnomeShell *self)
 {
   g_return_if_fail (self != NULL);
@@ -429,9 +454,25 @@ deap_gnome_shell_class_init (DeapGnomeShellClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, execute_show_applications_cb);
   gtk_widget_class_bind_template_callback (widget_class, execute_focus_search_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_button_press_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_selected_cb);
 
   /* org.gnome.Shell.Extensions widgets */
   gtk_widget_class_bind_template_child (widget_class, DeapGnomeShell, exts_list_box);
+}
+
+static void
+create_action_group (DeapGnomeShell *self)
+{
+  const GActionEntry entries[] = {
+      { "execute", NULL }
+  };
+  GSimpleActionGroup *group;
+
+  group = g_simple_action_group_new ();
+  g_action_map_add_action_entries (G_ACTION_MAP (group), entries, G_N_ELEMENTS (entries), self);
+
+  self->action_group = G_ACTION_GROUP (group);
+  gtk_widget_insert_action_group (GTK_WIDGET (self), "extension", self->action_group);
 }
 
 static void
@@ -439,6 +480,7 @@ deap_gnome_shell_init (DeapGnomeShell *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
 
+  create_action_group (self);
   register_gdbus_proxies (self);
 }
 
