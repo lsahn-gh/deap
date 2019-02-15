@@ -92,7 +92,7 @@ shell_extension_info_new (GVariant *value   /* {sv} type */)
 static void
 shell_extension_info_free (gpointer user_data)
 {
-  ShellExtensionInfo *info = (ShellExtensionInfo *)user_data;
+  ShellExtensionInfo *info = SHELL_EXTENSION_INFO (user_data);
 
   g_free (info->name);
   g_free (info->description);
