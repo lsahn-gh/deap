@@ -44,6 +44,16 @@ G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_BOX)
 
 
 static void
+on_session_list_row_selected_cb (GtkListBox    *box,
+                                 GtkListBoxRow *row,
+                                 gpointer       user_data)
+{
+  DeapLogin1 *self = DEAP_LOGIN1 (user_data);
+
+
+}
+
+static void
 execute_lock_screen_cb (GtkWidget *button,
                         gpointer   user_data)
 {
@@ -145,6 +155,7 @@ deap_login1_class_init (DeapLogin1Class *klass)
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, lock_screen);
   gtk_widget_class_bind_template_child (widget_class, DeapLogin1, session_id_entry);
   gtk_widget_class_bind_template_callback (widget_class, execute_lock_screen_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_session_list_row_selected_cb);
 }
 
 static void
