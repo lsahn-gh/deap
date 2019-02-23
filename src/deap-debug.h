@@ -58,6 +58,9 @@ G_BEGIN_DECLS
 #define deap_trace_msg(fmt, ...) \
   deap_log("  MSG: %s(): %d: " fmt, G_STRFUNC, __LINE__, ##__VA_ARGS__)
 
+#define deap_info_msg(fmt, ...) \
+  g_info ("  MSG: %s(): %d: " fmt, G_STRFUNC, __LINE__, ##__VA_ARGS__)
+
 #define deap_debug_msg(fmt, ...) \
   g_debug("  MSG: %s(): %d: " fmt, G_STRFUNC, __LINE__, ##__VA_ARGS__)
 
