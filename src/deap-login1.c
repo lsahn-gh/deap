@@ -42,8 +42,133 @@ struct _DeapLogin1
   GPtrArray     *sessions;
 };
 
+typedef struct
+{
+  gchar *session_id;
+  gchar *user_id;
+  gchar *user_name;
+  gchar *seat_id;
+  gchar *obj_path;
+} Login1Session;
+
 G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_BOX)
 
+#define LOGIN1_SESSION(_ptr)  ((Login1Session*)_ptr)
+
+
+static gpointer
+login1_session_new (const gchar *session_id,
+                    guint32      user_id,
+                    const gchar *user_name,
+                    const gchar *seat_id,
+                    const gchar *obj_path)
+{
+  Login1Session *session;
+
+  session = g_new0 (Login1Session, 1);
+
+  session->session_id = g_strdup (session_id);
+  session->user_id = g_strdup_printf ("%d", user_id);
+  session->user_name = g_strdup (user_name);
+  session->seat_id = g_strdup (seat_id);
+  session->obj_path = g_strdup (obj_path);
+
+  return (gpointer) session;
+}
+
+static void
+login1_session_free (gpointer user_data)
+{
+  Login1Session *session;
+
+  g_return_if_fail (user_data != NULL);
+
+  session = LOGIN1_SESSION (user_data);
+
+  g_free (session->session_id);
+  g_free (session->user_id);
+  g_free (session->user_name);
+  g_free (session->seat_id);
+  g_free (session->obj_path);
+  g_free (session);
+}
+
+static GPtrArray *
+parse_from_serialized_dbus_data (GVariant *resource)
+{
+  g_autoptr(GVariantIter) iter = NULL;
+  GPtrArray *ret;
+  gsize len;
+
+  g_return_val_if_fail (resource != NULL, NULL);
+
+  g_variant_get (resource, "(a(susso))", &iter);
+  len = g_variant_iter_n_children (iter);
+
+  ret = g_ptr_array_new_full (len, login1_session_free);
+
+  {
+    gchar *session_id;
+    guint32 user_id;
+    gchar *user_name;
+    gchar *seat_id;
+    gchar *obj_path;
+
+    while (g_variant_iter_loop (iter, "(susso)", &session_id, &user_id, &user_name, &seat_id, &obj_path)) {
+      gpointer p;
+
+      p = login1_session_new (session_id, user_id, user_name, seat_id, obj_path);
+      g_ptr_array_add (ret, p);
+    }
+  }
+
+  return ret;
+}
+
+static GtkWidget *
+create_session_list_row (gpointer user_data)
+{
+  Login1Session *session;
+  GtkWidget *row;
+  GtkWidget *hbox;
+  GtkWidget *session_id;
+  GtkWidget *user_id;
+  GtkWidget *user_name;
+
+  session = LOGIN1_SESSION (user_data);
+
+  row = gtk_list_box_row_new ();
+  g_object_set_data (G_OBJECT (row), "session-id", g_strdup (session->session_id));
+
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+
+  session_id = gtk_label_new (session->session_id);
+  gtk_box_pack_start (GTK_BOX (hbox), session_id, TRUE, FALSE, 0);
+
+  user_id = gtk_label_new (session->user_id);
+  gtk_box_pack_start (GTK_BOX (hbox), user_id, TRUE, FALSE, 0);
+
+  user_name = gtk_label_new (session->user_name);
+  gtk_box_pack_start (GTK_BOX (hbox), user_name, TRUE, FALSE, 0);
+
+  gtk_container_add (GTK_CONTAINER (row), hbox);
+  gtk_widget_show_all (row);
+
+  return row;
+}
+
+static void
+add_row_to_session_list_func (gpointer data,
+                              gpointer user_data)
+{
+  DeapLogin1 *self;
+  GtkWidget *row;
+
+  self = DEAP_LOGIN1 (user_data);
+  row = create_session_list_row (data);
+
+  gtk_list_box_insert (GTK_LIST_BOX (self->session_list), row, -1);
+}
 
 static void
 get_session_list_finish (GObject      *source,
@@ -61,6 +186,9 @@ get_session_list_finish (GObject      *source,
     deap_warn_msg ("Error org.freedesktop.login1.Manager.ListSessions: %s", error->message);
     return;
   }
+
+  self->sessions = parse_from_serialized_dbus_data (ret);
+  g_ptr_array_foreach (self->sessions, add_row_to_session_list_func, self);
 }
 
 static void
