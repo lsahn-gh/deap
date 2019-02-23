@@ -38,10 +38,43 @@ struct _DeapLogin1
   GtkWidget     *session_list;
   GtkWidget     *lock_screen;
   GtkWidget     *session_id_entry;
+
+  GPtrArray     *sessions;
 };
 
 G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_BOX)
 
+
+static void
+get_session_list_finish (GObject      *source,
+                         GAsyncResult *res,
+                         gpointer      user_data)
+{
+  DeapLogin1 *self = DEAP_LOGIN1 (user_data);
+  g_autoptr(GVariant) ret = NULL;
+  g_autoptr(GError) error = NULL;
+
+  ret = g_dbus_proxy_call_finish (self->login1,
+                                  res,
+                                  &error);
+  if (error) {
+    deap_warn_msg ("Error org.freedesktop.login1.Manager.ListSessions: %s", error->message);
+    return;
+  }
+}
+
+static void
+get_session_list (DeapLogin1 *self)
+{
+  g_dbus_proxy_call (self->login1,
+                     "ListSessions",
+                     NULL,
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     (GAsyncReadyCallback) get_session_list_finish,
+                     self);
+}
 
 static void
 login1_proxy_acquired_cb (GObject      *source,
@@ -55,8 +88,10 @@ login1_proxy_acquired_cb (GObject      *source,
 
   if (error)
     deap_warn_msg ("Error acquiring org.freedesktop.login1: %s", error->message);
-  else
+  else {
     deap_info_msg ("org.freedesktop.login1 successfully acquired");
+    get_session_list (self);
+  }
 }
 
 static void
