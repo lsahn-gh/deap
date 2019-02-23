@@ -53,14 +53,14 @@ execute_lock_screen_cb (GtkWidget *button,
 
   session_id = gtk_entry_get_text (GTK_ENTRY (self->session_id_entry));
   if (*session_id == '\0') {
-    g_warning ("Session ID entry is empty");
+    deap_warn_msg ("Session ID entry is empty");
     return;
   }
 
   /* Does it have any alphabets? if so, just return */
   for (p = session_id; *p != '\0'; p++) {
     if (!g_ascii_isdigit (*p)) {
-      g_warning ("Only numbers are allowed");
+      deap_warn_msg ("Only numbers are allowed");
       return;
     }
   }
@@ -86,9 +86,9 @@ login1_proxy_acquired_cb (GObject      *source,
   self->login1 = g_dbus_proxy_new_for_bus_finish (res, &error);
 
   if (error)
-    g_warning ("Error acquiring org.freedesktop.login1: %s", error->message);
+    deap_warn_msg ("Error acquiring org.freedesktop.login1: %s", error->message);
   else
-    g_info ("org.freedesktop.login1 successfully acquired");
+    deap_info_msg ("org.freedesktop.login1 successfully acquired");
 }
 
 static void
