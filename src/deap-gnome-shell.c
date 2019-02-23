@@ -185,7 +185,7 @@ get_extension_list_finish (GObject      *source,
                                         res,
                                         &error);
   if (error) {
-    g_warning ("Error org.gnome.ShellExtensions.ListExtensions: %s", error->message);
+    deap_warn_msg ("Error org.gnome.ShellExtensions.ListExtensions: %s", error->message);
     return;
   }
 
@@ -219,9 +219,9 @@ shell_extension_proxy_acquired_cb (GObject      *source,
   self->shell_extension = g_dbus_proxy_new_for_bus_finish (res, &error);
 
   if (error)
-    g_warning ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
+    deap_warn_msg ("Error acquiring org.gnome.Shell.Extensions: %s", error->message);
   else {
-    g_info ("org.gnome.Shell.Extensions successfully acquired");
+    deap_info_msg ("org.gnome.Shell.Extensions successfully acquired");
     get_extension_list (self);
   }
 }
@@ -305,7 +305,7 @@ get_shell_version (DeapGnomeShell *self)
 
   gvar_ver = g_dbus_proxy_get_cached_property (self->shell, "ShellVersion");
   if (gvar_ver == NULL) {
-    g_warning ("ShellVersion property is not cached yet");
+    deap_warn_msg ("ShellVersion property is not cached yet");
     return NULL;
   }
 
@@ -327,9 +327,9 @@ shell_proxy_acquired_cb (GObject      *source,
   self->shell = g_dbus_proxy_new_for_bus_finish (res, &error);
 
   if (error)
-    g_warning ("Error acquiring org.gnome.Shell: %s", error->message);
+    deap_warn_msg ("Error acquiring org.gnome.Shell: %s", error->message);
   else {
-    g_info ("org.gnome.Shell successfully acquired");
+    deap_info_msg ("org.gnome.Shell successfully acquired");
     self->shell_version = g_strdup (get_shell_version (self));
   }
 }
