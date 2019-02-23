@@ -18,7 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "DeapLogin1"
+
 #include "deap-config.h"
+#include "deap-debug.h"
 #include "deap-login1.h"
 
 #include <gio/gio.h>
