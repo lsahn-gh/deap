@@ -44,6 +44,40 @@ G_DEFINE_TYPE (DeapLogin1, deap_login1, GTK_TYPE_BOX)
 
 
 static void
+login1_proxy_acquired_cb (GObject      *source,
+                          GAsyncResult *res,
+                          gpointer      user_data)
+{
+  DeapLogin1 *self = DEAP_LOGIN1 (user_data);
+  g_autoptr(GError) error = NULL;
+
+  self->login1 = g_dbus_proxy_new_for_bus_finish (res, &error);
+
+  if (error)
+    deap_warn_msg ("Error acquiring org.freedesktop.login1: %s", error->message);
+  else
+    deap_info_msg ("org.freedesktop.login1 successfully acquired");
+}
+
+static void
+register_gdbus_proxies (DeapLogin1 *self)
+{
+  g_return_if_fail (self != NULL);
+
+  self->cancellable = g_cancellable_new ();
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL, /* GDBusInterfaceInfo */
+                            "org.freedesktop.login1",
+                            "/org/freedesktop/login1",
+                            "org.freedesktop.login1.Manager",
+                            self->cancellable,
+                            login1_proxy_acquired_cb,
+                            self);
+}
+
+/* --- Callbacks for Widgets --- */
+static void
 on_session_list_row_selected_cb (GtkListBox    *box,
                                  GtkListBoxRow *row,
                                  gpointer       user_data)
@@ -84,39 +118,8 @@ execute_lock_screen_cb (GtkWidget *button,
                      NULL,
                      self);
 }
+/* --- End of Callbacks --- */
 
-static void
-login1_proxy_acquired_cb (GObject      *source,
-                          GAsyncResult *res,
-                          gpointer      user_data)
-{
-  DeapLogin1 *self = DEAP_LOGIN1 (user_data);
-  g_autoptr(GError) error = NULL;
-
-  self->login1 = g_dbus_proxy_new_for_bus_finish (res, &error);
-
-  if (error)
-    deap_warn_msg ("Error acquiring org.freedesktop.login1: %s", error->message);
-  else
-    deap_info_msg ("org.freedesktop.login1 successfully acquired");
-}
-
-static void
-register_gdbus_proxies (DeapLogin1 *self)
-{
-  g_return_if_fail (self != NULL);
-
-  self->cancellable = g_cancellable_new ();
-  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
-                            G_DBUS_PROXY_FLAGS_NONE,
-                            NULL, /* GDBusInterfaceInfo */
-                            "org.freedesktop.login1",
-                            "/org/freedesktop/login1",
-                            "org.freedesktop.login1.Manager",
-                            self->cancellable,
-                            login1_proxy_acquired_cb,
-                            self);
-}
 
 /* --- GObject --- */
 static void
