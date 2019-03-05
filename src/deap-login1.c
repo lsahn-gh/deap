@@ -246,8 +246,11 @@ on_session_list_row_selected_cb (GtkListBox    *box,
                                  gpointer       user_data)
 {
   DeapLogin1 *self = DEAP_LOGIN1 (user_data);
+  const gchar *session_id = NULL;
 
+  session_id = g_object_get_data (G_OBJECT (row), "session-id");
 
+  gtk_entry_set_text (GTK_ENTRY (self->session_id_entry), session_id);
 }
 
 static void
