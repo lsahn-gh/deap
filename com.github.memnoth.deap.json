@@ -40,6 +40,16 @@
     ],
     "modules": [
         {
+            "name": "vte",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/vte.git",
+                    "tag": "0.56.0"
+                }
+            ]
+        },
+        {
             "name": "libdazzle",
             "buildsystem": "meson",
             "config-opts": [
