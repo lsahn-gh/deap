@@ -4,6 +4,7 @@ deap_sources = [
   'deap-window.c',
   'deap-gnome-shell.c',
   'deap-login1.c',
+  'deap-virtual-terminal.c',
 ]
 
 deap_sources += [
@@ -18,7 +19,8 @@ includes = include_directories(
 deap_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
-  dependency('libdazzle-1.0', version: '>= 3.31.4')
+  dependency('libdazzle-1.0', version: '>= 3.31.4'),
+  dependency('vte-2.91', version: '>= 0.56.0')
 ]
 
 gnome = import('gnome')
