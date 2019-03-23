@@ -4,5 +4,6 @@
     <file>deap-window.ui</file>
     <file>deap-gnome-shell.ui</file>
     <file>deap-login1.ui</file>
+    <file>deap-virtual-terminal.ui</file>
   </gresource>
 </gresources>
