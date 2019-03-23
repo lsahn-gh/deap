@@ -21,6 +21,7 @@
 
 #include "deap-gnome-shell.h"
 #include "deap-login1.h"
+#include "deap-virtual-terminal.h"
 
 struct _DeapWindow
 {
@@ -91,11 +92,13 @@ deap_window_init (DeapWindow *self)
   static PrefsItem item_table[] = {
       { "org.gnome.Shell", "", "gnome-shell", NULL },
       { "org.freedesktop.login1", "", "freedesktop-login1", NULL },
+      { "Virtual Terminal", "", "virtual-terminal", NULL },
       { NULL }
   };
 
   item_table[0].widget = deap_gnome_shell_get_instance ();
   item_table[1].widget = deap_login1_get_instance ();
+  item_table[2].widget = deap_virtual_terminal_get_instance ();
 
   add_preferences (DZL_PREFERENCES (self->prefs_view), item_table);
 }
